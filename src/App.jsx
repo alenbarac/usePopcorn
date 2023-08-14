@@ -57,19 +57,21 @@ export default function App() {
   const [isOpen2, setIsOpen2] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [query, setQuery] = useState('')
 
   async function fetchData() {
     try {
       setIsLoading(true)
-      const response = await fetch(`https://www.omdbapi.com/?apiKey=${apiKey}&s=pulp`)
+      setErrorMsg('')
+      const response = await fetch(`https://www.omdbapi.com/?apiKey=${apiKey}&s=${query}`)
 
       if (!response.ok) throw new Error('Something went wrong with fetching data')
+
       const data = await response.json()
 
       if (data.Response === 'False') throw new Error('Movie not found')
       setMovies(data.Search)
     } catch (error) {
-      console.log(error.message)
       setErrorMsg(error.message)
     } finally {
       setIsLoading(false)
@@ -77,13 +79,18 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (query.length < 3) {
+      setMovies([])
+      setErrorMsg('')
+      return
+    }
     fetchData()
-  }, [])
+  }, [query])
 
   return (
     <>
       <NavBar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
 
@@ -137,8 +144,7 @@ function Logo() {
   )
 }
 
-function Search() {
-  const [query, setQuery] = useState('')
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
@@ -186,6 +192,7 @@ function Box({ children }) {
 }*/
 
 function MoviesList({ movies }) {
+  console.log(movies)
   return (
     <ul className="list">
       {movies?.map((movie) => (
