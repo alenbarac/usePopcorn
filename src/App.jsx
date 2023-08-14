@@ -1,28 +1,5 @@
 import { useEffect, useState } from 'react'
-
-const tempMovieData = [
-  {
-    imdbID: 'tt1375666',
-    Title: 'Inception',
-    Year: '2010',
-    Poster:
-      'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg',
-  },
-  {
-    imdbID: 'tt0133093',
-    Title: 'The Matrix',
-    Year: '1999',
-    Poster:
-      'https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg',
-  },
-  {
-    imdbID: 'tt6751668',
-    Title: 'Parasite',
-    Year: '2019',
-    Poster:
-      'https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg',
-  },
-]
+import StarRating from './StarRating'
 
 const tempWatchedData = [
   {
@@ -176,6 +153,7 @@ function Search({ query, setQuery }) {
 
 function MovieDetails({ selectedId, onCloseMovie }) {
   const [movie, setMovie] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
   const {
     Title: title,
     Year: year,
@@ -190,37 +168,52 @@ function MovieDetails({ selectedId, onCloseMovie }) {
   } = movie
   useEffect(() => {
     async function getMovieDetails() {
-      const response = await fetch(`https://www.omdbapi.com/?apiKey=${apiKey}&i=${selectedId}`)
-      const data = await response.json()
-      console.log(data)
-      setMovie(data)
+      try {
+        setIsLoading(true)
+        const response = await fetch(`https://www.omdbapi.com/?apiKey=${apiKey}&i=${selectedId}`)
+        const data = await response.json()
+        setMovie(data)
+        setIsLoading(false)
+      } catch (error) {
+        console.log(error)
+      }
     }
     getMovieDetails()
   }, [selectedId])
 
   return (
     <div className="details">
-      <header>
-        <button className="btn-back" onClick={onCloseMovie}>
-          &larr;
-        </button>
-        <img src={poster} alt={`Poster of a ${movie} movie`} />
-        <div className="details-overview">
-          <h2>{title}</h2>
-          <p>
-            {released} &bull; {runtime}
-          </p>
-          <p>{genre}</p>
-          <p>IMDB: {imdbRating}</p>
-        </div>
-      </header>
-      <section>
-        <p>
-          <em>{plot}</em>
-        </p>
-        <p>Starring: {actors}</p>
-        <p>Directed by {director}</p>
-      </section>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className="btn-back" onClick={onCloseMovie}>
+              &larr;
+            </button>
+            <img src={poster} alt={`Poster of a ${movie} movie`} />
+            <div className="details-overview">
+              <h2>{title}</h2>
+              <p>
+                {released} &bull; {runtime}
+              </p>
+              <p>{genre}</p>
+              <p>IMDB: {imdbRating}</p>
+            </div>
+          </header>
+          <section>
+            <div className="rating">
+              <StarRating maxRating={10} size={24} />
+            </div>
+
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring: {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+        </>
+      )}
     </div>
   )
 }
