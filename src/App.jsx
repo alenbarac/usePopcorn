@@ -175,13 +175,52 @@ function Search({ query, setQuery }) {
 }
 
 function MovieDetails({ selectedId, onCloseMovie }) {
+  const [movie, setMovie] = useState({})
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Released: released,
+    Runtime: runtime,
+    Genre: genre,
+    imdbRating,
+    Plot: plot,
+    Actors: actors,
+    Director: director,
+  } = movie
+  useEffect(() => {
+    async function getMovieDetails() {
+      const response = await fetch(`https://www.omdbapi.com/?apiKey=${apiKey}&i=${selectedId}`)
+      const data = await response.json()
+      console.log(data)
+      setMovie(data)
+    }
+    getMovieDetails()
+  }, [selectedId])
+
   return (
     <div className="details">
-      <button className="btn-back" onClick={onCloseMovie}>
-        &larr;
-      </button>
-
-      {selectedId}
+      <header>
+        <button className="btn-back" onClick={onCloseMovie}>
+          &larr;
+        </button>
+        <img src={poster} alt={`Poster of a ${movie} movie`} />
+        <div className="details-overview">
+          <h2>{title}</h2>
+          <p>
+            {released} &bull; {runtime}
+          </p>
+          <p>{genre}</p>
+          <p>IMDB: {imdbRating}</p>
+        </div>
+      </header>
+      <section>
+        <p>
+          <em>{plot}</em>
+        </p>
+        <p>Starring: {actors}</p>
+        <p>Directed by {director}</p>
+      </section>
     </div>
   )
 }
