@@ -67,7 +67,7 @@ export default function App() {
         const data = await response.json()
 
         if (data.Response === 'False') throw new Error('Movie not found')
-        console.log(data.Search)
+
         setMovies(data.Search)
       } catch (error) {
         setErrorMsg(error.message)
@@ -81,7 +81,7 @@ export default function App() {
       setErrorMsg('')
       return
     }
-
+    handleCloseMovie()
     fetchData()
     return () => {
       controller.abort()
@@ -226,6 +226,19 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchedMovie, watched }) 
     onAddWatchedMovie(newWatchedMovie)
     onCloseMovie()
   }
+
+  useEffect(() => {
+    function callback(e) {
+      if (e.code === 'Escape') {
+        onCloseMovie()
+      }
+    }
+
+    document.addEventListener('keydown', callback)
+    return () => {
+      document.removeEventListener('keydown', callback)
+    }
+  }, [onCloseMovie])
 
   return (
     <div className="details">
