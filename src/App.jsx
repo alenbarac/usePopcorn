@@ -1,7 +1,10 @@
+import { useRef } from 'react'
 import { useEffect, useState } from 'react'
 import StarRating from './StarRating'
 
-const tempWatchedData = [
+/* eslint-disable react/prop-types */
+
+/* const tempWatchedData = [
   {
     imdbID: 'tt1375666',
     Title: 'Inception',
@@ -22,7 +25,7 @@ const tempWatchedData = [
     imdbRating: 8.5,
     userRating: 9,
   },
-]
+] */
 
 const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0)
 
@@ -171,6 +174,20 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  const inputElement = useRef(null)
+
+  useEffect(() => {
+    if (document.activeElement === inputElement.current) return
+    function callback(e) {
+      if (e.code === 'Enter') {
+        inputElement.current.focus()
+        setQuery('')
+      }
+    }
+    document.addEventListener('keydown', callback)
+    return () => document.removeEventListener('keydown', callback)
+  }, [setQuery])
+
   return (
     <input
       className="search"
@@ -178,6 +195,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputElement}
     />
   )
 }
@@ -186,6 +204,14 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchedMovie, watched }) 
   const [movie, setMovie] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [userRating, setUserRating] = useState('')
+
+  const countRef = useRef(0)
+
+  useEffect(() => {
+    if (userRating) {
+      countRef.current = countRef.current + 1
+    }
+  }, [userRating])
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId)
   const watchedUserRating = watched.find((movie) => movie.imdbID === selectedId)?.userRating
@@ -234,6 +260,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchedMovie, watched }) 
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(' ').at(0)),
       userRating,
+      countRatingDecisions: countRef.current,
     }
     onAddWatchedMovie(newWatchedMovie)
     onCloseMovie()
