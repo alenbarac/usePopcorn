@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useEffect, useState } from 'react'
 import StarRating from './StarRating'
+import { useLocalStorageState } from './useLocalStorageState'
 import { useMovies } from './useMovies'
 
 /* eslint-disable react/prop-types */
@@ -13,11 +14,7 @@ export default function App() {
 
   const { movies, isLoading, errorMsg } = useMovies(query)
 
-  /*  const [watched, setWatched] = useState([]) */
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem('watched')
-    return JSON.parse(storedValue)
-  })
+  const [watched, setWatched] = useLocalStorageState([], 'watched')
 
   function handleSelectMovie(id) {
     setSelectedId((current) => (current === id ? null : id))
@@ -29,17 +26,11 @@ export default function App() {
 
   function handleWatchedMovie(movie) {
     setWatched((watched) => [...watched, movie])
-
-    /* localStorage.setItem('watched', JSON.stringify([...watched, movie])) */
   }
 
   function handleRemoveWatchedMovie(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id))
   }
-
-  useEffect(() => {
-    localStorage.setItem('watched', JSON.stringify(watched))
-  }, [watched])
 
   return (
     <>
@@ -169,7 +160,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchedMovie, watched }) 
     async function getMovieDetails() {
       try {
         setIsLoading(true)
-        const response = await fetch(`https://www.omdbapi.com/?apiKey=${apiKey}&i=${selectedId}`)
+        const response = await fetch(`https://www.omdbapi.com/?apiKey=a192b306&i=${selectedId}`)
         const data = await response.json()
         setMovie(data)
         setIsLoading(false)
